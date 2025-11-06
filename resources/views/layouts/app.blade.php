@@ -21,13 +21,16 @@
     
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
 </head>
+<style>
+
+</style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
-            <i class="fas fa-heart-pulse me-2"></i>Mi Bienestar Digital
-        </a>
+        
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
