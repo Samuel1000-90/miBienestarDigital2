@@ -3,38 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Habito;
+use App\Models\Progreso;
 
 class AdminController extends Controller
 {
-    /**
-     * Muestra el panel del administrador
-     */
-    public function admin_panel()
+    public function index()
     {
-        return view('admin.admin_panel');
-    }
+        $usuarios = Usuario::all();
+        $habitos = Habito::all();
+        $progresos = Progreso::all();
 
-    /**
-     * Muestra la vista de usuarios
-     */
-    public function admin_usuario()
-    {
-        return view('admin.admin_usuario');
+        return view('admin.panel', compact('usuarios', 'habitos', 'progresos'));
     }
-
-    /**
-     * Muestra la vista de gestión de usuarios
-     */
-    public function admin_gestionUsuario()
-    {
-        return view('admin.admin_gestionUsuario');
-    }
-
-    /**
-     * Muestra la vista principal del administrador
-     */
-    public function administrador()
-    {
-        return view('admin.administrador');
-    }
 }
+
