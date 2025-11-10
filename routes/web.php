@@ -1,65 +1,48 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\RutinaController;
-use App\Http\Controllers\TareaController;
-use App\Http\Controllers\PerfilController;
-use App\Http\Controllers\AdminLoginController;
+use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\MetaController;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route; // Add this line
+use App\Http\Controllers\ReporteController;
 
-/*
-|--------------------------------------------------------------------------
-| Rutas públicas
-|--------------------------------------------------------------------------
-*/
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+Route::get('/admin/reportes', [ReporteController::class, 'index'])->name('admin.reportes');
 
-Route::get('/', function () {
-    return Auth::check() ? redirect('/dashboard') : redirect('/login');
+
+Route::get('/admin/panel', [AdminController::class, 'index'])->name('admin.panel');
+
+
+// Mostrar el formulario de login
+Route::get('/admin/login', function () {
+    return view('admin.login');
+})->name('admin.login');
+
+// Procesar el login
+Route::post('/admin/login', function (Request $request) {
+    $email = $request->input('email');
+    $password = $request->input('password');
+
+    // credenciales del administrador (puedes cambiarlas)
+    $adminEmail = 'admin@bienestardigital.com';
+    $adminPass = 'admin123';
+
+    if ($email === $adminEmail && $password === $adminPass) {
+        session(['admin_logged_in' => true]);
+        return redirect('/admin/dashboard');
+    } else {
+        return back()->with('error', 'Correo o contraseña incorrectos');
+    }
 });
 
-/*
-|--------------------------------------------------------------------------
-| Rutas protegidas (requieren login)
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->group(function () {
+// Panel del administrador (solo si está logueado)
+Route::get('/admin/dashboard', function () {
+    if (!session('admin_logged_in')) {
+        return redirect('/admin/login')->with('error', 'Debes iniciar sesión.');
+    }
+    return view('admin.dashboard');
+})->name('admin.dashboard');
 
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    Route::resource('rutinas', RutinaController::class);
-    Route::post('/rutinas/{rutina}/completar', [RutinaController::class, 'marcarCompletada'])->name('rutinas.completar');
-
-    Route::resource('tareas', TareaController::class);
-    Route::post('/tareas/{tarea}/completar', [TareaController::class, 'completar'])->name('tareas.completar');
-    Route::get('/tareas-calendario', [TareaController::class, 'calendario'])->name('tareas.calendario');
-    Route::get('/tareas-vencidas', [TareaController::class, 'vencidas'])->name('tareas.vencidas');
-
-    Route::get('/perfil', [PerfilController::class, 'show'])->name('perfil.show');
-    Route::get('/perfil/editar', [PerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
-
-    Route::resource('metas', MetaController::class);
-    Route::post('metas/{meta}/progreso', [MetaController::class, 'updateProgreso'])->name('metas.progreso');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Rutas del Administrador
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('/admin/panel', [AdminController::class, 'admin_panel'])->name('admin.panel');
-    Route::get('/admin/usuario', [AdminController::class, 'admin_usuario'])->name('admin.usuario');
-    Route::get('/admin/gestion', [AdminController::class, 'admin_gestionUsuario'])->name('admin.gestion');
-    Route::get('/admin/administrador', [AdminController::class, 'administrador'])->name('admin.administrador');
+// Cerrar sesión
+Route::get('/admin/logout', function () {
+    session()->forget('admin_logged_in');
+    return redirect('/admin/login')->with('success', 'Sesión cerrada correctamente.');
 });
